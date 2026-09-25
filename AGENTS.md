@@ -7,6 +7,7 @@ Qualquer pedido sobre tráfego pago: campanhas, anúncios, Meta/Facebook/Instagr
 
 ## Como rotear (sem outro LLM)
 1. Obtenha a rota:
+   - via MCP (ChatGPT, Codex, Claude Desktop): ferramenta `traffic_route` (servidor `node mcp/server.mjs`, ver `docs/CHATGPT.md`);
    - com shell: `node router/router.mjs "<mensagem do usuário>"` (JSON) ou `--context` (texto curto);
    - sem shell: leia `router/skill-registry.json` (triggers por skill) e `router/intents.json` (fluxos).
 2. Leia **primeiro** `skills/trafego-pago/SKILL.md` (orquestrador) quando houver fluxo ou pedido genérico.
@@ -19,7 +20,7 @@ Qualquer pedido sobre tráfego pago: campanhas, anúncios, Meta/Facebook/Instagr
 {
   "matched": true,
   "platform": "meta | google | multi | null",
-  "flow": { "id": "criar-campanha | meta-ads | google-ads | analisar-campanha | criar-anuncio | testar-criativos | entrada", "via": "..." },
+  "flow": { "id": "criar-campanha | meta-ads | google-ads | analisar-campanha | criar-anuncio | testar-criativos | melhorar-pagina | remarketing | entrada", "via": "..." },
   "primary": "id da skill principal",
   "skills": [{ "id": "...", "file": "skills/<id>/SKILL.md", "role": "step | optional | direct | platform", "goal": "..." }],
   "loadNow": ["arquivos para ler agora"],

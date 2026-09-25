@@ -4,8 +4,8 @@
 // O host (Claude, ChatGPT, etc.) continua sendo a inteligencia; o router so aponta
 // quais skills carregar e em que ordem (progressive disclosure).
 
-import { readFileSync, existsSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { basename, dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
 const ROUTER_DIR = dirname(fileURLToPath(import.meta.url));
@@ -23,8 +23,8 @@ export function normalize(text) {
   return String(text ?? '')
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .replace(/[‘’“”]/g, '"')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[\u2018\u2019\u201c\u201d]/g, '"')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -64,10 +64,10 @@ function platformSkills(platform) {
   return map[platform] ? [map[platform]] : [];
 }
 
-function pickFlow(text, platform, scores) {
-  const hits = intents.flows
-    .filter((f) => f.triggers.length && anyMatch(f.triggers, text))
-    .sort((a, b) => b.priority - a.priority);
+function pickFlow(text, platform, scores, forced) {
+  const hits = forced
+    ? [intents.flows.find((f) => f.id === forced)]
+    : intents.flows.filter((f) => f.triggers.length && anyMatch(f.triggers, text)).sort((a, b) => b.priority - a.priority);
   let flow = hits[0] ?? null;
   const also = hits.slice(1).map((f) => f.id);
   let via = null;
@@ -91,17 +91,19 @@ function skillEntry(id, extra) {
   return { id, name: s.name, file: s.file, ...extra };
 }
 
-export function route(message) {
+// options.flow forca um fluxo (ex.: ferramenta MCP plan_campaign); nesse caso a porteira de dominio e ignorada.
+export function route(message, options = {}) {
+  const forced = options.flow && intents.flows.some((f) => f.id === options.flow) ? options.flow : null;
   const normalized = normalize(message);
   const empty = { matched: false, query: message, normalized, skills: [] };
-  if (!normalized) return empty;
+  if (!normalized && !forced) return empty;
 
   const scores = scoreSkills(normalized);
   // Porteira de dominio: sem ancora de trafego pago, nao roteia (evita disparar em conversas de codigo).
-  if (!anyMatch(intents.anchors, normalized)) return empty;
+  if (!forced && !anyMatch(intents.anchors, normalized)) return empty;
 
   const platform = detectPlatform(normalized);
-  const { flow, via, also } = pickFlow(normalized, platform, scores);
+  const { flow, via, also } = pickFlow(normalized, platform, scores, forced);
   const scoreOf = new Map(scores.map((s) => [s.id, s]));
   const skills = [];
   const seen = new Set();
@@ -134,7 +136,8 @@ export function route(message) {
   if (isEntry) {
     primary = registry.orchestrator;
   } else if (flow) {
-    primary = registry.orchestrator;
+    // Fluxos curtos declaram a propria skill principal; os longos sao coordenados pelo orquestrador.
+    primary = flow.primary ?? registry.orchestrator;
   } else {
     // Skill especifica com sinal forte vence a skill de plataforma ("keywords para Google Ads" -> keywords).
     const specific = (s) => (s.strong && !PLATFORM_SKILLS.has(s.id) ? 1 : 0);
@@ -150,7 +153,9 @@ export function route(message) {
   const required = skills.filter((s) => s.role !== 'optional');
   const loadNow = isEntry
     ? [byId.get(registry.orchestrator).file]
-    : flow
+    : flow?.primary
+      ? [byId.get(flow.primary).file]
+      : flow
       ? [byId.get(registry.orchestrator).file, required[0]?.file].filter(Boolean)
       : required.filter((s) => s.id === primary || (s.role === 'direct' && s.score >= STRONG)).slice(0, 3).map((s) => s.file);
 
@@ -172,7 +177,7 @@ export function route(message) {
   };
 }
 
-export function toContext(result, { root = ROOT, pluginName = 'trafego-agente-pago' } = {}) {
+export function toContext(result, { root = ROOT, pluginName = 'trafego-agente-pago', loadHint } = {}) {
   if (!result.matched) return '';
   const lines = ['[Trafego Agente Pago] Pedido de trafego pago detectado pelo router.'];
   if (result.flow) {
@@ -190,7 +195,8 @@ export function toContext(result, { root = ROOT, pluginName = 'trafego-agente-pa
   }
   if (result.ask.length) lines.push(`Pergunte apenas se faltar: ${result.ask.join(' | ')}`);
   lines.push(
-    `Como carregar: Skill "${pluginName}:<id>" ou leia ${join(root, 'skills', '<id>', 'SKILL.md')}. Nao carregue skills fora da lista.`,
+    loadHint ??
+      `Como carregar: Skill "${pluginName}:<id>" ou leia ${join(root, 'skills', '<id>', 'SKILL.md')}. Nao carregue skills fora da lista.`,
   );
   lines.push('Seguranca: nunca publicar, gastar, alterar orcamento ou apagar campanha sem confirmacao explicita.');
   return lines.join('\n');
@@ -205,6 +211,19 @@ export function getSkill(id) {
   if (!s) return null;
   const path = join(ROOT, s.file);
   return { ...s, content: existsSync(path) ? readFileSync(path, 'utf8') : null };
+}
+
+// Le um arquivo de references/ de uma skill, sem permitir sair da pasta (path traversal).
+export function getReference(id, file) {
+  if (!byId.has(id)) return null;
+  const name = basename(String(file ?? '')).replace(/\.md$/i, '') + '.md';
+  const path = join(ROOT, 'skills', id, 'references', name);
+  return existsSync(path) ? { skill: id, file: `references/${name}`, content: readFileSync(path, 'utf8') } : null;
+}
+
+export function listReferences(id) {
+  const dir = join(ROOT, 'skills', id, 'references');
+  return byId.has(id) && existsSync(dir) ? readdirSync(dir).filter((f) => f.endsWith('.md')) : [];
 }
 
 export { registry, intents };

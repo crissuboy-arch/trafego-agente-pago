@@ -83,6 +83,19 @@ for (const c of readdirSync(join(ROOT, 'commands'))) {
   if (ids.has(c.replace(/\.md$/, ''))) err(`commands/${c}: nome colide com skill`);
 }
 
+// MCP (ChatGPT e outros): uma ferramenta por skill especializada, nomes validos, sem mudar o plugin do Claude
+const { createTools } = await import('../mcp/tools.mjs');
+const toolNames = new Set(createTools().map((t) => t.name));
+for (const s of registry.skills) {
+  if (s.id === registry.orchestrator) continue;
+  const name = `traffic_${s.id === 'optimization' ? 'optimize' : s.id.replace(/-/g, '_')}`;
+  if (!toolNames.has(name)) err(`mcp: skill ${s.id} sem ferramenta ${name}`);
+}
+for (const n of toolNames) if (!/^[a-zA-Z0-9_-]{1,64}$/.test(n)) err(`mcp: nome de ferramenta invalido para ChatGPT: ${n}`);
+if (existsSync(join(ROOT, '.mcp.json')) || plugin.mcpServers) {
+  err('.mcp.json/mcpServers no plugin faria o Claude Code iniciar o servidor MCP; mantenha o MCP separado do plugin');
+}
+
 // Segredos obvios em arquivos versionaveis
 const secretRe = /(EAA[A-Za-z0-9]{30,}|AIza[0-9A-Za-z_-]{35}|sk-[A-Za-z0-9]{20,}|ya29\.[0-9A-Za-z_-]{20,}|-----BEGIN [A-Z ]*PRIVATE KEY-----)/;
 function walk(dir) {
@@ -100,4 +113,6 @@ if (errors.length) {
   console.error(`Validacao falhou (${errors.length}):\n- ${errors.join('\n- ')}`);
   process.exit(1);
 }
-console.log(`OK: ${registry.skills.length} skills, ${intents.flows.length} fluxos, ${readdirSync(join(ROOT, 'commands')).length} comandos validados.`);
+console.log(
+  `OK: ${registry.skills.length} skills, ${intents.flows.length} fluxos, ${readdirSync(join(ROOT, 'commands')).length} comandos, ${toolNames.size} ferramentas MCP validados.`,
+);

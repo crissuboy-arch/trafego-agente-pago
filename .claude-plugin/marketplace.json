@@ -8,7 +8,7 @@
       "name": "trafego-agente-pago",
       "source": "./",
       "description": "Agente de trafego pago com roteamento automatico de skills (Meta Ads, Google Ads, copy, criativos, publicos, keywords, tracking, metricas, otimizacao).",
-      "version": "1.0.0"
+      "version": "1.1.0"
     }
   ]
 }

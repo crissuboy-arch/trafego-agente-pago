@@ -1,6 +1,8 @@
 # Skills
 
-Gerado a partir de `router/skill-registry.json` e `router/intents.json`. Triggers aparecem normalizados (sem acento); o usuário pode escrever com acento.
+Gerado por `npm run docs` a partir de `router/skill-registry.json`, `router/intents.json` e `mcp/tools.mjs`. Triggers aparecem normalizados (sem acento); o usuário pode escrever com acento.
+
+As mesmas skills atendem os dois hosts: no Claude Code como `trafego-agente-pago:<id>`, no ChatGPT/MCP pela ferramenta indicada.
 
 ## Fluxos
 
@@ -8,10 +10,12 @@ Gerado a partir de `router/skill-registry.json` e `router/intents.json`. Trigger
 |---|---|---|
 | Criar campanha (`criar-campanha`) | market-research (condicional) → offer → audience → campaign-strategy → ad-copy → creative-strategy → meta-ads/google-ads → tracking | Plano de campanha completo + checklist de pre-publicacao |
 | Meta Ads (`meta-ads`) | campaign-strategy → audience → offer → creative-strategy → ad-copy → meta-ads → tracking → optimization | Estrutura Meta Ads pronta para configurar + checklist |
-| Google Ads (`google-ads`) | keywords → google-ads → ad-copy → landing-page → tracking → optimization | Estrutura Google Ads (campanhas, grupos, keywords, negativas, anuncios) + checklist |
+| Google Ads (`google-ads`) | campaign-strategy → keywords → google-ads → ad-copy → landing-page → tracking → optimization | Estrutura Google Ads (campanhas, grupos, keywords, negativas, anuncios) + checklist |
 | Analisar campanha (`analisar-campanha`) | analytics → optimization → creative-strategy (condicional) → landing-page (condicional) → offer (condicional) → tracking (condicional) | Diagnostico com gargalo, hipotese, acao e plano de teste |
 | Criar anuncio (`criar-anuncio`) | offer → creative-strategy → ad-copy | Anuncios prontos (hook, copy, CTA, conceito visual) com variacoes |
 | Testar criativos (`testar-criativos`) | creative-strategy → optimization → ad-copy (condicional) | Plano de teste de criativos com variacoes e regra de decisao |
+| Melhorar pagina (`melhorar-pagina`) | landing-page → cro → tracking (condicional) | Lista de ajustes priorizados + wireframe em texto + testes |
+| Remarketing (`remarketing`) | remarketing → audience → ad-copy → creative-strategy (condicional) → tracking (condicional) | Plano de remarketing (publicos, janelas, mensagens, orcamento) |
 
 ## Skills
 
@@ -19,6 +23,7 @@ Gerado a partir de `router/skill-registry.json` e `router/intents.json`. Trigger
 
 Porta de entrada. Entende o pedido, escolhe o fluxo e delega para as skills especializadas.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_route / traffic_plan_campaign`
 - **Plataforma:** meta, google, multi
 - **Intenções:** entrada, orquestrar, duvida-geral
 - **Triggers fortes:** trafego pago, gestor de trafego, gestao de trafego, anuncios pagos, anuncio pago, midia paga, paid media, ppc, trafego
@@ -30,6 +35,7 @@ Porta de entrada. Entende o pedido, escolhe o fluxo e delega para as skills espe
 
 Estrutura, configuracao e boas praticas de campanhas no Gerenciador de Anuncios da Meta.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_meta_ads`
 - **Plataforma:** meta
 - **Intenções:** criar-campanha, estrutura, configurar
 - **Triggers fortes:** meta ads, facebook ads, instagram ads, gerenciador de anuncios, advantage+, advantage plus, conjunto de anuncios, cbo, abo, lead ads, anuncio de cadastro, click to whatsapp, anuncio para whatsapp, campanha de mensagens, boost, impulsionar
@@ -43,6 +49,7 @@ Estrutura, configuracao e boas praticas de campanhas no Gerenciador de Anuncios 
 
 Campanhas de Pesquisa, Performance Max, Shopping, Display e YouTube.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_google_ads`
 - **Plataforma:** google
 - **Intenções:** criar-campanha, estrutura, configurar
 - **Triggers fortes:** google ads, adwords, search ads, rede de pesquisa, campanha de pesquisa, performance max, pmax, google shopping, rede de display, youtube ads, anuncio no google, anunciar no google, anuncios no google, anuncio responsivo, rsa, demand gen
@@ -56,6 +63,7 @@ Campanhas de Pesquisa, Performance Max, Shopping, Display e YouTube.
 
 Objetivo, estrutura, orcamento, distribuicao de verba, fases de teste e escala.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_campaign_strategy`
 - **Plataforma:** meta, google, multi
 - **Intenções:** criar-campanha, planejar, orcamento, escalar
 - **Triggers fortes:** estrategia de campanha, estrutura de campanha, estruturar campanha, plano de midia, planejamento de campanha, objetivo da campanha, objetivo de campanha, orcamento, verba, budget, escalar, escala, escalonar, distribuicao de verba, quanto investir, investimento em anuncios
@@ -69,6 +77,7 @@ Objetivo, estrutura, orcamento, distribuicao de verba, fases de teste e escala.
 
 Demanda, nicho, consciencia do publico, dores/desejos e validacao antes de investir.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_market_research`
 - **Plataforma:** multi
 - **Intenções:** pesquisar, validar
 - **Triggers fortes:** pesquisa de mercado, estudo de mercado, analise de mercado, tamanho de mercado, validar produto, validar nicho, demanda, nicho, tendencia, tendencias, nivel de consciencia
@@ -82,6 +91,7 @@ Demanda, nicho, consciencia do publico, dores/desejos e validacao antes de inves
 
 Biblioteca de anuncios, angulos e ofertas da concorrencia, lacunas e diferenciacao.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_competitor_research`
 - **Plataforma:** meta, google, multi
 - **Intenções:** pesquisar, benchmark
 - **Triggers fortes:** concorrente, concorrentes, concorrencia, biblioteca de anuncios, ad library, anuncios dos concorrentes, espionar, benchmark, google ads transparency, centro de transparencia
@@ -95,6 +105,7 @@ Biblioteca de anuncios, angulos e ofertas da concorrencia, lacunas e diferenciac
 
 Persona, interesses, publicos personalizados, lookalike, exclusoes e segmentacao por plataforma.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_audience`
 - **Plataforma:** meta, google, multi
 - **Intenções:** segmentar, criar-campanha
 - **Triggers fortes:** publico, publicos, publico-alvo, publico alvo, segmentacao, segmentar, persona, avatar, icp, cliente ideal, interesses, lookalike, semelhante, publico semelhante, publico personalizado, custom audience, publico aberto, advantage+ audience
@@ -108,6 +119,7 @@ Persona, interesses, publicos personalizados, lookalike, exclusoes e segmentacao
 
 Proposta de valor, preco, bonus, garantia, urgencia e quebra de objecoes.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_offer`
 - **Plataforma:** multi
 - **Intenções:** criar-campanha, criar-anuncio, diagnostico
 - **Triggers fortes:** oferta, proposta de valor, garantia, bonus, ancoragem, escassez, urgencia, objecao, objecoes, promocao, desconto, preco, precificacao, big idea, mecanismo unico
@@ -121,6 +133,7 @@ Proposta de valor, preco, bonus, garantia, urgencia e quebra de objecoes.
 
 Textos, headlines, descricoes e CTAs por plataforma, com variacoes para teste.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_ad_copy`
 - **Plataforma:** meta, google, multi
 - **Intenções:** criar-anuncio, escrever
 - **Triggers fortes:** copy, copies, copywriting, texto do anuncio, texto de anuncio, textos de anuncio, headline, headlines, titulo do anuncio, titulos, descricao do anuncio, cta, chamada para acao, legenda, texto principal
@@ -134,6 +147,7 @@ Textos, headlines, descricoes e CTAs por plataforma, com variacoes para teste.
 
 Angulos, hooks, conceitos visuais, roteiros de video/UGC e matriz de teste de criativos.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_creative_strategy`
 - **Plataforma:** meta, google, multi
 - **Intenções:** criar-anuncio, testar-criativos
 - **Triggers fortes:** criativo, criativos, hook, hooks, gancho, ganchos, angulo, angulos, ugc, roteiro, roteiro de video, conceito visual, carrossel, thumbnail, arte do anuncio, briefing de criativo, video de anuncio, anuncio em video
@@ -147,6 +161,7 @@ Angulos, hooks, conceitos visuais, roteiros de video/UGC e matriz de teste de cr
 
 Estrutura e copy de pagina de destino alinhada ao anuncio (message match).
 
+- **Ferramenta MCP (ChatGPT):** `traffic_landing_page`
 - **Plataforma:** multi
 - **Intenções:** criar-campanha, diagnostico
 - **Triggers fortes:** landing page, landing pages, pagina de vendas, pagina de captura, pagina de destino, pagina do produto, lp, squeeze page, message match
@@ -160,6 +175,7 @@ Estrutura e copy de pagina de destino alinhada ao anuncio (message match).
 
 Arquitetura do funil (topo/meio/fundo), iscas, tripwire, upsell e jornada.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_funnel`
 - **Plataforma:** multi
 - **Intenções:** planejar, criar-campanha
 - **Triggers fortes:** funil, funis, funil de vendas, topo de funil, meio de funil, fundo de funil, jornada do cliente, isca digital, lead magnet, tripwire, upsell, order bump, esteira de produtos, perpetuo, webinar
@@ -173,6 +189,7 @@ Arquitetura do funil (topo/meio/fundo), iscas, tripwire, upsell e jornada.
 
 Diagnostico e testes para aumentar a taxa de conversao de pagina, formulario e checkout.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_cro`
 - **Plataforma:** multi
 - **Intenções:** diagnostico, otimizar
 - **Triggers fortes:** cro, taxa de conversao, conversao da pagina, pagina nao converte, checkout, abandono de carrinho, carrinho abandonado, formulario, mapa de calor, heatmap, taxa de rejeicao, bounce
@@ -186,6 +203,7 @@ Diagnostico e testes para aumentar a taxa de conversao de pagina, formulario e c
 
 Pesquisa, intencao, tipos de correspondencia, negativas e agrupamento para Google Ads.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_keywords`
 - **Plataforma:** google
 - **Intenções:** google-ads, pesquisar
 - **Triggers fortes:** palavra-chave, palavras-chave, palavra chave, palavras chave, keyword, keywords, negativas, palavras negativas, palavra negativa, termos de pesquisa, termo de pesquisa, correspondencia, planejador de palavras, grupos de anuncios, grupo de anuncios
@@ -199,6 +217,7 @@ Pesquisa, intencao, tipos de correspondencia, negativas e agrupamento para Googl
 
 Pixel, API de Conversoes, GA4, GTM, tag de conversao do Google, UTMs e validacao de eventos.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_tracking`
 - **Plataforma:** meta, google, multi
 - **Intenções:** configurar, diagnostico
 - **Triggers fortes:** pixel, api de conversoes, capi, tracking, rastreamento, rastrear, gtm, tag manager, google tag, ga4, google analytics, utm, utms, eventos, evento de conversao, tag de conversao, conversoes offline, gerenciador de eventos, enhanced conversions, conversoes otimizadas
@@ -212,6 +231,7 @@ Pixel, API de Conversoes, GA4, GTM, tag de conversao do Google, UTMs e validacao
 
 Leitura de CTR, CPC, CPM, CPA, ROAS, frequencia; benchmarks, funil de metricas e relatorios.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_analytics`
 - **Plataforma:** meta, google, multi
 - **Intenções:** analisar-campanha, relatorio
 - **Triggers fortes:** ctr, cpc, cpm, cpa, cpl, roas, roi, cac, ltv, metricas, metrica, kpi, kpis, relatorio, dashboard, frequencia, custo por resultado, custo por lead, custo por compra, ticket medio, hook rate, hold rate
@@ -225,6 +245,7 @@ Leitura de CTR, CPC, CPM, CPA, ROAS, frequencia; benchmarks, funil de metricas e
 
 Diagnostico de gargalo, hipoteses, testes A/B, fadiga de criativo, regras de corte e escala.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_optimize`
 - **Plataforma:** meta, google, multi
 - **Intenções:** analisar-campanha, otimizar, testar-criativos
 - **Triggers fortes:** otimizar, otimizacao, otimize, melhorar resultados, melhorar campanha, diagnostico, gargalo, teste a/b, teste ab, testes a/b, ab test, split test, fadiga, saturacao, auditoria, auditar, nao esta vendendo, nao vende, nao converte, sem vendas, nao tem vendas, cpa alto, cpa caro, custo alto, ta caro, esta caro, piorou, caiu
@@ -238,6 +259,7 @@ Diagnostico de gargalo, hipoteses, testes A/B, fadiga de criativo, regras de cor
 
 Publicos quentes, janelas, sequencias, anuncios dinamicos/catalogo e exclusoes.
 
+- **Ferramenta MCP (ChatGPT):** `traffic_remarketing`
 - **Plataforma:** meta, google, multi
 - **Intenções:** criar-campanha, recuperar
 - **Triggers fortes:** remarketing, retargeting, remarketing dinamico, anuncios dinamicos, catalogo, dpa, advantage+ catalogo, visitantes do site, publico quente, reengajamento, recuperar carrinho, quem visitou

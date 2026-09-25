@@ -61,6 +61,7 @@
       "priority": 55,
       "triggers": [],
       "steps": [
+        { "skill": "campaign-strategy", "goal": "Objetivo, tipo de campanha, orcamento e CPA/ROAS alvo" },
         { "skill": "keywords", "goal": "Intencao, palavras-chave, negativas e grupos" },
         { "skill": "google-ads", "goal": "Tipo de campanha, lances e estrutura" },
         { "skill": "ad-copy", "goal": "Anuncios responsivos (titulos e descricoes)" },
@@ -125,6 +126,38 @@
         { "skill": "ad-copy", "goal": "Copies para as variacoes", "optional": true }
       ],
       "deliverable": "Plano de teste de criativos com variacoes e regra de decisao"
+    },
+    {
+      "id": "melhorar-pagina",
+      "name": "Melhorar pagina",
+      "priority": 65,
+      "primary": "landing-page",
+      "triggers": [
+        "\\b(melhor\\w*|otimiz\\w*|ajust\\w*|revis\\w*|corrig\\w*|refaz\\w*|refa(ca|zer))\\b.{0,30}\\b(landing pages?|lp|pagina de (vendas|captura|destino)|pagina|checkout)\\b"
+      ],
+      "steps": [
+        { "skill": "landing-page", "goal": "Estrutura, copy por secao e message match" },
+        { "skill": "cro", "goal": "Diagnostico de conversao e testes priorizados" },
+        { "skill": "tracking", "goal": "Se houver duvida sobre os dados da pagina", "optional": true }
+      ],
+      "deliverable": "Lista de ajustes priorizados + wireframe em texto + testes"
+    },
+    {
+      "id": "remarketing",
+      "name": "Remarketing",
+      "priority": 52,
+      "primary": "remarketing",
+      "triggers": [
+        "\\b(cri\\w*|mont\\w*|fa(z|ca|zer)|configur\\w*|quero|preciso|comec\\w*|estrutur\\w*|sub\\w*)\\b.{0,40}\\b(remarketing|retargeting)\\b"
+      ],
+      "steps": [
+        { "skill": "remarketing", "goal": "Segmentos, janelas, exclusoes e sequencia" },
+        { "skill": "audience", "goal": "Publicos personalizados e exclusoes" },
+        { "skill": "ad-copy", "goal": "Mensagens por segmento" },
+        { "skill": "creative-strategy", "goal": "Formatos/criativos por segmento", "optional": true },
+        { "skill": "tracking", "goal": "Eventos necessarios para os publicos", "optional": true }
+      ],
+      "deliverable": "Plano de remarketing (publicos, janelas, mensagens, orcamento)"
     }
   ],
   "entry": {

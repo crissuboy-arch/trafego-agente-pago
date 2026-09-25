@@ -1,13 +1,25 @@
 # Trafego Agente Pago
 
-Plugin/agente de **tráfego pago** para o Claude Code (e preparado para outros agentes e para o ChatGPT). Você fala naturalmente — "tráfego pago", "crie uma campanha Meta Ads", "meu anúncio não está vendendo" — e o sistema escolhe sozinho as skills certas: estratégia, público, oferta, copy, criativos, keywords, tracking, métricas e otimização.
+Agente de **tráfego pago** para o **Claude Code** (plugin) e o **ChatGPT** (servidor MCP) — uma única base de skills para os dois. Você fala naturalmente — "tráfego pago", "crie uma campanha Meta Ads", "meu anúncio não está vendendo" — e o sistema escolhe sozinho as skills certas: estratégia, público, oferta, copy, criativos, keywords, tracking, métricas e otimização.
 
 ```
-HOST AI (Claude / ChatGPT) → TRAFEGO AGENTE PAGO → ROUTER → SKILL(S) CERTA(S) → EXECUÇÃO → RESULTADO
+                 trafego-agente-pago
+                         │
+          ┌──────────────┴──────────────┐
+     Claude Code                     ChatGPT
+   plugin + hook                 servidor MCP (mcp/)
+          └──────────────┬──────────────┘
+                 router (router/)
+                         │
+              trafego-pago (orquestrador)
+                         │
+                   18 skills (skills/)
+                         │
+                references/ sob demanda
 ```
 
 - **Sem IA própria, sem API de LLM.** O modelo hospedeiro é a inteligência; o plugin traz conhecimento especializado e um router determinístico.
-- **Sem dependências.** Node >= 18 só para o router, o hook e os testes.
+- **Sem dependências.** Node >= 18 para o router, o hook, o servidor MCP e os testes. Sem `npm install`.
 - **Seguro por padrão.** Planeja e escreve; nada é publicado, gasto ou alterado em conta real sem sua confirmação.
 
 ## Instalação (Claude Code)
@@ -28,6 +40,15 @@ Reinicie a sessão (ou use `/reload-plugins`, se disponível). Para usar uma có
 
 Guia passo a passo: [docs/QUICKSTART.md](docs/QUICKSTART.md).
 
+## Instalação (ChatGPT)
+
+```bash
+npm run mcp                                     # servidor MCP em http://127.0.0.1:8787/mcp
+cloudflared tunnel --url http://localhost:8787  # URL HTTPS pública gratuita
+```
+
+No ChatGPT: **Configurações → Apps e Conectores → Avançado → Modo desenvolvedor**. Depois **Criar** conector com a URL `https://<túnel>/mcp` e autenticação "Sem autenticação". Guia completo, hospedagem fixa e clientes stdio (Codex, Claude Desktop): [docs/CHATGPT.md](docs/CHATGPT.md).
+
 ## Como usar
 
 Basta escrever. Exemplos:
@@ -42,6 +63,8 @@ Basta escrever. Exemplos:
 | `me dê palavras-chave para Google Ads` | Skill de keywords (+ Google Ads) |
 | `meu anúncio não está vendendo` | Diagnóstico guiado por gargalo |
 | `quero testar novos criativos` | Matriz de teste de criativos + critério de vencedor |
+| `melhore minha landing page` | Landing page + CRO (ajustes priorizados e testes) |
+| `crie remarketing` | Remarketing + públicos + copy por segmento |
 
 Comandos opcionais (atalhos para os fluxos): `/trafego-agente-pago:trafego`, `:criar-campanha`, `:analisar-campanha`, `:criar-anuncio`, `:campanha-meta`, `:campanha-google`, `:testar-criativos`.
 
@@ -74,11 +97,13 @@ Detalhes: [docs/SKILLS.md](docs/SKILLS.md).
 
 1. **Hook** (`hooks/hooks.json` → `router/hook.mjs`) roda a cada mensagem no Claude Code. Se não for assunto de tráfego, fica em silêncio.
 2. **Router** (`router/router.mjs`) normaliza o texto (minúsculas, sem acento), pontua os triggers de cada skill em `router/skill-registry.json` e identifica, em ordem de prioridade:
-   1. **intenção explícita** (fluxo em `router/intents.json`: criar campanha, analisar, criar anúncio, testar criativos);
+   1. **intenção explícita** (fluxo em `router/intents.json`: criar campanha, analisar, criar anúncio, testar criativos, melhorar página, remarketing);
    2. **plataforma** (Meta, Google ou ambas — "criar campanha" + Meta vira o fluxo Meta Ads);
    3. **tarefa** (skill específica com sinal forte, ex.: keywords, tracking, audience);
    4. **combinação** de skills (etapas do fluxo + skills citadas diretamente + skill da plataforma).
 3. O hook injeta um bloco curto `[Trafego Agente Pago]` com o fluxo e as skills em ordem. O modelo carrega **cada skill só quando chega na etapa dela** (progressive disclosure) — economiza tokens.
+
+No ChatGPT o mesmo router é chamado pela ferramenta `traffic_route`, que devolve o mesmo fluxo e o texto só das skills necessárias no momento; as demais vêm pelas ferramentas `traffic_<skill>` conforme o fluxo avança.
 
 Depurar: `npm run route -- "quero anunciar no Google"` (JSON) ou `node router/router.mjs "..." --context`.
 
@@ -88,7 +113,7 @@ Depurar: `npm run route -- "quero anunciar no Google"` (JSON) ou `node router/ro
 2. (Opcional) Coloque material longo em `skills/<id>/references/` e cite com `` `references/arquivo.md` ``.
 3. Registre em `router/skill-registry.json`: `id`, `name`, `description`, `intents`, `triggers` (fortes), `weakTriggers`, `platform`, `inputs`, `file`, `related`. Triggers em minúsculas e sem acento.
 4. Se fizer parte de um fluxo, adicione a etapa em `router/intents.json`.
-5. Adicione um caso em `tests/router.test.mjs` e rode `npm run check`.
+5. Adicione um caso em `tests/router.test.mjs`, rode `npm run docs` e `npm run check`. A ferramenta MCP `traffic_<id>` é criada automaticamente a partir do registro.
 
 ## Segurança
 
@@ -103,18 +128,19 @@ Depurar: `npm run route -- "quero anunciar no Google"` (JSON) ou `node router/ro
 .claude-plugin/   plugin.json + marketplace.json (instalação no Claude Code)
 skills/<id>/      SKILL.md (instrução enxuta) + references/ (aprofundamento sob demanda)
 router/           skill-registry.json, intents.json, router.mjs (lib + CLI), hook.mjs
-hooks/            hooks.json (UserPromptSubmit → roteamento automático)
+hooks/            hooks.json (UserPromptSubmit → roteamento automático no Claude Code)
+mcp/              server.mjs (HTTP + stdio), protocol.mjs (JSON-RPC/MCP), tools.mjs (ferramentas → router/skills)
 commands/         atalhos para os fluxos
 scripts/          validate.mjs
-tests/            node:test (roteamento, hook)
+tests/            node:test (roteamento, hook, MCP HTTP/stdio)
 AGENTS.md         instruções portáveis para qualquer agente
 ```
 
 Mais em [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## ChatGPT / MCP (futuro)
+## ChatGPT / MCP
 
-A lógica não depende do Claude: skills são Markdown, o registro é JSON e o router exporta funções puras (`route`, `listSkills`, `getSkill`, `toContext`). Para o ChatGPT, basta um servidor MCP fino que exponha essas funções como ferramentas (`route_request`, `list_skills`, `get_skill`) — ver [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#integração-futura-chatgpt--mcp). Não foi implementado agora de propósito: o núcleo local vem primeiro.
+Implementado em `mcp/`, sem dependências, reaproveitando o router e as skills. São 18 ferramentas `traffic_*`: `route`, `plan_campaign` e uma por skill especializada (`optimization` → `traffic_optimize`). Há também `search`/`fetch`. Todas são somente leitura. Veja [docs/CHATGPT.md](docs/CHATGPT.md).
 
 ## Créditos e licença
 

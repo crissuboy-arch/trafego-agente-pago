@@ -95,6 +95,32 @@ test('variacoes de escrita e outros pedidos de trafego', () => {
   assert.equal(route('escreva headlines para minha landing page').primary, 'ad-copy');
 });
 
+// Exemplos de roteamento exigidos para paridade Claude Code / ChatGPT.
+const parity = [
+  ['crie uma campanha Meta Ads', ['campaign-strategy', 'meta-ads', 'audience', 'offer', 'ad-copy', 'creative-strategy']],
+  ['quero anunciar no Google', ['google-ads', 'keywords', 'campaign-strategy']],
+  ['analise minha campanha', ['analytics', 'optimization']],
+  ['me faça 5 anúncios', ['ad-copy', 'creative-strategy']],
+  ['melhore minha landing page', ['landing-page', 'cro'], 'landing-page'],
+  ['crie remarketing', ['remarketing', 'audience', 'ad-copy'], 'remarketing'],
+];
+for (const [q, must, primary] of parity) {
+  test(`paridade: "${q}"`, () => {
+    const r = route(q);
+    assert.ok(includesAll(required(r), must), `esperado ${must} em ${required(r)}`);
+    if (primary) {
+      assert.equal(r.primary, primary);
+      assert.deepEqual(r.loadNow, [`skills/${primary}/SKILL.md`]);
+    }
+  });
+}
+
+test('fluxo forcado (usado pelo MCP plan_campaign) ignora a porteira de dominio', () => {
+  const r = route('minha loja de roupas', { flow: 'criar-campanha' });
+  assert.equal(r.flow.id, 'criar-campanha');
+  assert.equal(route('minha loja de roupas no instagram', { flow: 'criar-campanha' }).flow.id, 'meta-ads');
+});
+
 test('nao dispara fora do dominio', () => {
   for (const q of ['corrija o bug no parser', 'analise este código', 'qual a previsão do tempo?', '', 'faça um resumo do livro']) {
     assert.equal(route(q).matched, false, q);
