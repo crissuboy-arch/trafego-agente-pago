@@ -1,0 +1,12 @@
+{
+  "name": "trafego-agente-pago",
+  "version": "1.0.0",
+  "description": "Agente de trafego pago (Meta Ads e Google Ads) com roteamento automatico de skills: estrategia, publico, oferta, copy, criativos, keywords, tracking, metricas e otimizacao.",
+  "author": {
+    "name": "crissuboy-arch"
+  },
+  "homepage": "https://github.com/crissuboy-arch/trafego-agente-pago",
+  "repository": "https://github.com/crissuboy-arch/trafego-agente-pago",
+  "license": "MIT",
+  "keywords": ["trafego pago", "meta ads", "google ads", "facebook ads", "copywriting", "criativos", "marketing"]
+}

@@ -1,0 +1,16 @@
+{
+  "description": "Roteamento automatico: detecta pedidos de trafego pago e indica as skills certas ao modelo.",
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/router/hook.mjs\"",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,0 +1,19 @@
+# Segredos e credenciais — nunca versionar
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+credentials*.json
+service-account*.json
+
+# Dependencias / sistema
+node_modules/
+.DS_Store
+Thumbs.db
+*.log
+
+# Briefings e dados reais de clientes (ficam locais)
+briefing-*.md
+dados/
+exports/

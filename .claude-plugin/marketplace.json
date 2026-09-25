@@ -1,0 +1,14 @@
+{
+  "name": "trafego-agente-pago",
+  "owner": {
+    "name": "crissuboy-arch"
+  },
+  "plugins": [
+    {
+      "name": "trafego-agente-pago",
+      "source": "./",
+      "description": "Agente de trafego pago com roteamento automatico de skills (Meta Ads, Google Ads, copy, criativos, publicos, keywords, tracking, metricas, otimizacao).",
+      "version": "1.0.0"
+    }
+  ]
+}

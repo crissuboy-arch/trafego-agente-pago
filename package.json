@@ -1,0 +1,22 @@
+{
+  "name": "trafego-agente-pago",
+  "version": "1.0.0",
+  "description": "Plugin/agente de trafego pago (Meta Ads e Google Ads) com roteamento automatico de skills para Claude Code e agentes compativeis.",
+  "type": "module",
+  "private": true,
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "test": "node --test",
+    "validate": "node scripts/validate.mjs",
+    "check": "node scripts/validate.mjs && node --test",
+    "route": "node router/router.mjs",
+    "skills": "node router/router.mjs --list"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/crissuboy-arch/trafego-agente-pago.git"
+  }
+}

@@ -1,0 +1,139 @@
+{
+  "$comment": "Fluxos compostos, deteccao de plataforma e ancoras de dominio. Padroes sao regex aplicadas ao texto normalizado (minusculo, sem acento).",
+  "version": "1.0.0",
+  "anchors": [
+    "trafego", "anunci\\w*", "campanh\\w*", "\\bads\\b", "adwords", "criativ\\w*", "pixel", "\\butms?\\b", "\\bgtm\\b", "\\bga4\\b",
+    "\\b(ctr|cpc|cpm|cpa|cpl|roas|roi|cac)\\b", "public\\w*", "segmentac\\w*", "palavras?[- ]chave", "keywords?", "remarketing", "retargeting",
+    "\\bcop(y|ies)\\b", "headlines?", "landing pages?", "pagina de (vendas|captura|destino)", "funil", "oferta", "lookalike",
+    "\\bvend\\w*", "\\bconvers\\w*", "\\bleads?\\b", "gestor de trafego", "impulsion\\w*", "boost", "\\bhooks?\\b", "ugc", "\\bcro\\b",
+    "api de conversoes", "concorren\\w*", "pesquisa de mercado"
+  ],
+  "platforms": {
+    "meta": ["meta ads", "\\bmeta\\b", "facebook", "\\bfb\\b", "instagram", "\\binsta\\b", "reels", "stories", "whatsapp", "gerenciador de anuncios", "advantage\\+?"],
+    "google": ["google", "adwords", "youtube", "performance max", "\\bpmax\\b", "shopping", "rede de pesquisa", "rede de display", "palavras?[- ]chave", "keywords?", "\\bsearch\\b"]
+  },
+  "flows": [
+    {
+      "id": "criar-campanha",
+      "name": "Criar campanha",
+      "priority": 50,
+      "triggers": [
+        "\\b(cri\\w*|mont\\w*|estrutur\\w*|sub\\w*|lanc\\w*|fa(z|ca|zer)|comec\\w*|inici\\w*|configur\\w*|planej\\w*|nova)\\b.{0,40}\\bcampanh\\w*",
+        "\\bcampanha nova\\b",
+        "\\b(quero|preciso|vou|gostaria de|como) (\\w+ ){0,2}anunciar\\b",
+        "\\banunciar (meu|minha|o|a|no|na|para|pra)\\b",
+        "\\b(quero|preciso) (vender|divulgar)\\b.{0,40}\\b(anunc\\w*|ads|trafego|campanh\\w*|facebook|instagram|google|meta)",
+        "\\bcomecar (a|com) (anunciar|trafego)"
+      ],
+      "steps": [
+        { "skill": "market-research", "goal": "Validar mercado, demanda e nivel de consciencia", "optional": true },
+        { "skill": "offer", "goal": "Definir/fortalecer a oferta" },
+        { "skill": "audience", "goal": "Definir publico e segmentacao" },
+        { "skill": "campaign-strategy", "goal": "Objetivo, estrutura, orcamento e fases" },
+        { "skill": "ad-copy", "goal": "Textos e headlines" },
+        { "skill": "creative-strategy", "goal": "Angulos, hooks e conceitos de criativo" },
+        { "skill": "@platform", "goal": "Estrutura da campanha na plataforma" },
+        { "skill": "tracking", "goal": "Garantir pixel/tag e eventos antes de gastar" }
+      ],
+      "platformFlows": { "meta": "meta-ads", "google": "google-ads" },
+      "deliverable": "Plano de campanha completo + checklist de pre-publicacao"
+    },
+    {
+      "id": "meta-ads",
+      "name": "Meta Ads",
+      "priority": 55,
+      "triggers": [],
+      "steps": [
+        { "skill": "campaign-strategy", "goal": "Objetivo e evento de otimizacao" },
+        { "skill": "audience", "goal": "Publicos (aberto, interesses, lookalike, remarketing)" },
+        { "skill": "offer", "goal": "Oferta e promessa" },
+        { "skill": "creative-strategy", "goal": "Criativos e angulos" },
+        { "skill": "ad-copy", "goal": "Texto principal, titulo e CTA" },
+        { "skill": "meta-ads", "goal": "Estrutura campanha > conjuntos > anuncios" },
+        { "skill": "tracking", "goal": "Pixel + API de Conversoes + UTMs" },
+        { "skill": "optimization", "goal": "Regras de leitura, corte e escala" }
+      ],
+      "deliverable": "Estrutura Meta Ads pronta para configurar + checklist"
+    },
+    {
+      "id": "google-ads",
+      "name": "Google Ads",
+      "priority": 55,
+      "triggers": [],
+      "steps": [
+        { "skill": "keywords", "goal": "Intencao, palavras-chave, negativas e grupos" },
+        { "skill": "google-ads", "goal": "Tipo de campanha, lances e estrutura" },
+        { "skill": "ad-copy", "goal": "Anuncios responsivos (titulos e descricoes)" },
+        { "skill": "landing-page", "goal": "Pagina alinhada a intencao de busca" },
+        { "skill": "tracking", "goal": "Tag de conversao / GA4 / conversoes otimizadas" },
+        { "skill": "optimization", "goal": "Termos de pesquisa, lances e ajustes" }
+      ],
+      "deliverable": "Estrutura Google Ads (campanhas, grupos, keywords, negativas, anuncios) + checklist"
+    },
+    {
+      "id": "analisar-campanha",
+      "name": "Analisar campanha",
+      "priority": 60,
+      "triggers": [
+        "\\b(analis\\w*|avali\\w*|diagnost\\w*|audit\\w*|revis\\w*)\\b",
+        "\\bnao (esta |ta |tem |tive |teve )?(vend\\w*|convert\\w*|funcion\\w*|dando resultado|gerando)",
+        "\\bsem (vendas|resultado|conversoes|leads)\\b",
+        "\\b(caiu|piorou|subiu|aumentou|ta caro|esta caro|muito caro)\\b",
+        "\\bpor que (meu|minha|o|a)\\b.{0,40}\\b(anunc\\w*|campanh\\w*|cpa|cpc|ctr|roas)",
+        "\\b(ctr|cpc|cpm|cpa|cpl|roas)\\b.*\\b(ctr|cpc|cpm|cpa|cpl|roas)\\b"
+      ],
+      "steps": [
+        { "skill": "analytics", "goal": "Ler metricas e comparar com benchmarks/meta" },
+        { "skill": "optimization", "goal": "Gargalo, hipotese, acao recomendada e teste" },
+        { "skill": "creative-strategy", "goal": "Se o gargalo for CTR/hook", "optional": true },
+        { "skill": "landing-page", "goal": "Se o gargalo for pagina (clique sem conversao)", "optional": true },
+        { "skill": "offer", "goal": "Se o gargalo for oferta/preco", "optional": true },
+        { "skill": "tracking", "goal": "Se houver suspeita de conversao nao registrada", "optional": true }
+      ],
+      "deliverable": "Diagnostico com gargalo, hipotese, acao e plano de teste"
+    },
+    {
+      "id": "criar-anuncio",
+      "name": "Criar anuncio",
+      "priority": 40,
+      "triggers": [
+        "\\b(cri\\w*|escrev\\w*|fa(z|ca|zer)|ger\\w*|mont\\w*|me de|me da|quero|preciso de|sugir\\w*|elabor\\w*)\\b.{0,30}\\banuncios?\\b",
+        "\\b\\d+ (anuncios|copies|copys|variacoes|headlines|textos)\\b",
+        "\\bvariacoes de (anuncio|copy|texto)"
+      ],
+      "steps": [
+        { "skill": "offer", "goal": "Promessa central da oferta" },
+        { "skill": "creative-strategy", "goal": "Angulo, hook e conceito visual" },
+        { "skill": "ad-copy", "goal": "Copy, CTA e variacoes" }
+      ],
+      "deliverable": "Anuncios prontos (hook, copy, CTA, conceito visual) com variacoes"
+    },
+    {
+      "id": "testar-criativos",
+      "name": "Testar criativos",
+      "priority": 45,
+      "triggers": [
+        "\\btest\\w*\\b.{0,30}\\bcriativ\\w*",
+        "\\bnovos criativos\\b",
+        "\\bcriativos? novos?\\b",
+        "\\bteste (a/?b|de criativo|de anuncio)",
+        "\\bfadiga\\b"
+      ],
+      "steps": [
+        { "skill": "creative-strategy", "goal": "Matriz de angulos/hooks/formatos a testar" },
+        { "skill": "optimization", "goal": "Desenho do teste, criterio de vencedor e orcamento" },
+        { "skill": "ad-copy", "goal": "Copies para as variacoes", "optional": true }
+      ],
+      "deliverable": "Plano de teste de criativos com variacoes e regra de decisao"
+    }
+  ],
+  "entry": {
+    "flow": "entrada",
+    "skill": "trafego-pago",
+    "questions": [
+      "O que voce quer fazer agora? (criar campanha, criar anuncios, analisar resultados, pesquisar publico/keywords)",
+      "Qual produto/servico e qual o objetivo (vendas, leads, mensagens)?",
+      "Qual plataforma (Meta, Google ou ambas) e orcamento aproximado?"
+    ]
+  }
+}
